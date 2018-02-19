@@ -31,7 +31,7 @@ FileName = "Castlevania - Symphony of the Night (USA) (Track 1).bin"
 ShowItemPlacements = True #Print out a log of when items are placed
 
 #RandoSeed = 1234567890
-RandoSeed = datetime.time(datetime.now())
+RandoSeed = 0
 
 
 #Ability Checks
@@ -61,6 +61,7 @@ HasMermanStatue = False
 		#Spirit Orb
 		#Farie Scroll
 		#Leap Stone
+	#if Jewel of Open is collected, you can no longer buy the random relic from the Librarian, potentially causing a softlock.
 	
 #Some relics have doubles, so..
 	#Relic ID/Name 			#RelicLocation ID 	#Cant Be Behind 			RL ID No-Gos
@@ -293,8 +294,8 @@ def SoftUnlock():
 		#holy snorkel vanilla
 		if LocationsUsed[0x0e] == False:
 			LocationsAvailable.append(0x0e)
-	if HasJewelOfOpen and HasMist and (HasBat or HasPowerOfMist or (HasLeapStone and HasGravityBoots)) and (HasPowerOfMist or HasSonar):
-		#Castle 2 - Flight, Mist, Jewel of Open, and sonar or power of mist
+	if HasJewelOfOpen and HasMist and (HasBat or HasPowerOfMist or (HasLeapStone and HasGravityBoots)) and ((HasBat and HasSonar) or HasPowerOfMist):
+		#Castle 2 - Jewel of Open, Mist, Flight, and one of the two relic combinations that can pass the Spike Breaker room.
 		if LocationsUsed[0x03] == False:
 			LocationsAvailable.append(0x03)
 		if LocationsUsed[0x09] == False:
@@ -334,21 +335,38 @@ def SoftUnlock():
 	ThisLoc = FindUnplacedLocation(LocationsAvailable)
 
 	#Items are never allowed in these locations
-	if ThisRel == 0x02:
+	if ThisRel == 0x02: #Echo of Bat
 		if ThisLoc == 0x18 or ThisLoc == 0x19 or ThisLoc == 0x1a or ThisLoc == 0x1b or ThisLoc == 0x1c:
 			return SoftUnlock()
-	elif ThisRel == 0x07:
+	elif ThisRel == 0x07: #Form of Mist
 		if ThisLoc == 0x18 or ThisLoc == 0x19 or ThisLoc == 0x1a or ThisLoc == 0x1b or ThisLoc == 0x1c or ThisLoc == 0x00:
 			return SoftUnlock()
-	elif ThisRel == 0x10:
+	elif ThisRel == 0x10: #Jewel of Open
 		if ThisLoc == 0x18 or ThisLoc == 0x19 or ThisLoc == 0x1a or ThisLoc == 0x1b or ThisLoc == 0x1c or ThisLoc == 0x0d or ThisLoc == 0x0e or ThisLoc == 0x11 or ThisLoc == 0x15:
 			return SoftUnlock()
-	elif ThisRel == 0x11:
+	elif ThisRel == 0x11: #Merman Statue
 		if ThisLoc == 0x0e:
 			return SoftUnlock()
 
 	retval = [ThisRel, ThisLoc]
 	return retval
+
+def SetSeed():
+	Seed = 0 #Initialize return variable.
+	while Seed == 0: #Keep running until a valid seed is set.
+		try:
+			AskForSeed = int(input("Enter a 12-digit seed number, or enter 0 to generate one randomly.\n?"))
+			if int(AskForSeed) == 0: #User wants to generate a random seed.
+				print("Generating Random Seed...")
+				Seed = int(datetime.time(datetime.now()).strftime("%H%M%S%f")) #Set return variable to current system time, as 12 digit integer.
+			elif type(AskForSeed) == int and len(str(AskForSeed)) == 12 and AskForSeed > 0: #User entered a seed.
+				Seed = AskForSeed #Pass user-entered seed to return variable.
+			else: #User entered a negative number, or a number not 12 digits long.
+				print("Invalid input.")
+		except ValueError: #User entered a non-integer.
+			print("Invalid input.")
+	AskForSeed = None #Garbage collection.
+	return Seed
 
 def main():
 	print("Sotn Relic Randomizer")
@@ -357,9 +375,11 @@ def main():
 	print("If this is your first time running, you will need to download error_recalc.exe and put it in the same directory as this script. You can grab it here: https://www.romhacking.net/utilities/1264/")
 	print("")
 	
+	RandoSeed = SetSeed() #Returns random or user-entered 12-digit integer.
 	random.seed(RandoSeed)
-	print("Seed is \""+str(RandoSeed)+"\"")
-
+	print("Seed is \""+format(int(RandoSeed),'012d')+"\"") #Displays 12-digit seed number.
+	input("Press Enter to continue...") #Gives user time to write down the seed number.
+	
 	#Do some shuffling things, make sure things arent impossible to access
 	#Make things always possible later
 	print("Shuffling Relics..")

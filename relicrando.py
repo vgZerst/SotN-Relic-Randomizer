@@ -359,13 +359,14 @@ def SetSeed():
 			if int(AskForSeed) == 0: #User wants to generate a random seed.
 				print("Generating Random Seed...")
 				Seed = int(datetime.time(datetime.now()).strftime("%H%M%S%f")) #Set return variable to current system time, as 12 digit integer.
+				random.seed(Seed) #Initializes RNG to the generated timestamp.
 				Seed = random.randint(1,999999999999) #Advances the RNG by one step and generates a 12 digit integer.
-			elif type(AskForSeed) == int and len(str(AskForSeed)) <= 12 and AskForSeed > 0: #User entered a seed.
+			elif (type(AskForSeed) == int or type(AskForSeed) == long) and len(str(AskForSeed)) <= 12 and AskForSeed > 0: #User entered a seed.
 				Seed = AskForSeed #Pass user-entered seed to return variable.
-			else: #User entered a negative number, or a number with more than 12 digits.
-				print("Invalid input.")
+			else: #User entered a negative number.
+				print("Invalid input value.")
 		except ValueError: #User entered a non-integer.
-			print("Invalid input.")
+			print("Invalid input type.")
 	AskForSeed = None #Garbage collection.
 	return Seed
 

@@ -355,14 +355,14 @@ def SetSeed():
 	Seed = 0 #Initialize return variable.
 	while Seed == 0: #Keep running until a valid seed is set.
 		try:
-			AskForSeed = int(input("Enter a seed number (up to 12 digits), or enter 0 to generate one randomly.\n?"))
+			AskForSeed = int(raw_input("Enter a seed number (up to 12 digits), or enter 0 to generate one randomly.\n?"))
 			if int(AskForSeed) == 0: #User wants to generate a random seed.
 				print("Generating Random Seed...")
 				Seed = int(datetime.time(datetime.now()).strftime("%H%M%S%f")) #Set return variable to current system time, as 12 digit integer.
 				Seed = random.randint(1,999999999999) #Advances the RNG by one step and generates a 12 digit integer.
 			elif type(AskForSeed) == int and len(str(AskForSeed)) <= 12 and AskForSeed > 0: #User entered a seed.
 				Seed = AskForSeed #Pass user-entered seed to return variable.
-			else: #User entered a negative number.
+			else: #User entered a negative number, or a number with more than 12 digits.
 				print("Invalid input.")
 		except ValueError: #User entered a non-integer.
 			print("Invalid input.")
@@ -379,7 +379,7 @@ def main():
 	RandoSeed = SetSeed() #Returns random or user-entered integer, up to 12 digits.
 	random.seed(RandoSeed)
 	print("Seed is \""+format(int(RandoSeed),'012d')+"\"") #Displays seed number as 12 digit integer.
-	input("Press Enter to continue...") #Gives user time to write down the seed number.
+	raw_input("Press Enter to continue...") #Gives user time to write down the seed number.
 	
 	#Do some shuffling things, make sure things arent impossible to access
 	#Make things always possible later
